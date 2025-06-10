@@ -29,4 +29,6 @@ Rails.application.routes.draw do
     end
   end
 
+  get "/dashboard/summary", to: "dashboard#summary"
+
 end
