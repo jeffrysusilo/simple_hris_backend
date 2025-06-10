@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_10_054004) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_10_070339) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -32,6 +32,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_10_054004) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "leave_requests", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.text "reason"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_leave_requests_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -42,4 +53,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_10_054004) do
   end
 
   add_foreign_key "attendances", "users"
+  add_foreign_key "leave_requests", "users"
 end

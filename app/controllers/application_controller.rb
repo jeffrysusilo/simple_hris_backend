@@ -16,4 +16,10 @@ class ApplicationController < ActionController::API
       render json: { errors: "Invalid token: #{e.message}" }, status: :unauthorized
     end
   end
+
+  def authorize_admin
+    unless @current_user&.role == "admin"
+        render json: { error: "Hanya admin yang bisa mengakses fitur ini" }, status: :unauthorized
+    end
+    end
 end

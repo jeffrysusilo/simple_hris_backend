@@ -21,4 +21,12 @@ Rails.application.routes.draw do
       post :checkout
     end
   end
+
+  resources :leave_requests, only: [:index, :create] do
+    member do
+      patch :approve
+      patch :reject
+    end
+  end
+
 end

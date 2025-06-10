@@ -5,4 +5,6 @@ class User < ApplicationRecord
   validates :name, :role, presence: true
 
   has_many :attendances
+  has_many :leave_requests
+
 end
