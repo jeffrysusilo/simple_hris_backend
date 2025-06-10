@@ -14,4 +14,11 @@ Rails.application.routes.draw do
 
   # Optional: Default root
   # root "posts#index"
+
+  resources :attendances, only: [:index] do
+    collection do
+      post :checkin
+      post :checkout
+    end
+  end
 end

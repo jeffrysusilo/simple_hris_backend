@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_10_040658) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_10_054004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "attendances", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.datetime "check_in"
+    t.datetime "check_out"
+    t.date "date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_attendances_on_user_id"
+  end
 
   create_table "employees", force: :cascade do |t|
     t.string "name"
@@ -30,4 +40,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_10_040658) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "attendances", "users"
 end
