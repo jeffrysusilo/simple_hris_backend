@@ -31,4 +31,6 @@ Rails.application.routes.draw do
 
   get "/dashboard/summary", to: "dashboard#summary"
 
+  resources :employees, only: [:index, :show, :create, :update, :destroy]
+
 end

@@ -1,21 +1,23 @@
 class EmployeesController < ApplicationController
   before_action :authorize_request
-  before_action :set_employee, only: [:show, :update, :destroy]
+  before_action :authorize_admin
 
-  # GET /employees
   def index
-    employees = Employee.all
+    employees = User.where(role: "employee")
     render json: employees
   end
 
-  # GET /employees/:id
   def show
-    render json: @employee
+    employee = User.find_by(id: params[:id], role: "employee")
+    if employee
+      render json: employee
+    else
+      render json: { error: "Karyawan tidak ditemukan" }, status: :not_found
+    end
   end
 
-  # POST /employees
   def create
-    employee = Employee.new(employee_params)
+    employee = User.new(employee_params.merge(role: "employee"))
     if employee.save
       render json: employee, status: :created
     else
@@ -23,30 +25,28 @@ class EmployeesController < ApplicationController
     end
   end
 
-  # PUT /employees/:id
   def update
-    if @employee.update(employee_params)
-      render json: @employee
+    employee = User.find_by(id: params[:id], role: "employee")
+    if employee&.update(employee_params)
+      render json: employee
     else
-      render json: { errors: @employee.errors.full_messages }, status: :unprocessable_entity
+      render json: { error: "Update gagal" }, status: :unprocessable_entity
     end
   end
 
-  # DELETE /employees/:id
   def destroy
-    @employee.destroy
-    render json: { message: "Employee deleted" }
+    employee = User.find_by(id: params[:id], role: "employee")
+    if employee&.destroy
+      render json: { message: "Karyawan dihapus" }
+    else
+      render json: { error: "Gagal hapus karyawan" }, status: :unprocessable_entity
+    end
   end
 
   private
 
-  def set_employee
-    @employee = Employee.find(params[:id])
-  rescue ActiveRecord::RecordNotFound
-    render json: { error: "Employee not found" }, status: :not_found
-  end
-
   def employee_params
-    params.permit(:name, :position, :joined_date)
-  end
+    params.require(:user).permit(:name, :email, :password)
+    end
+
 end
