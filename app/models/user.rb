@@ -7,4 +7,6 @@ class User < ApplicationRecord
   has_many :attendances
   has_many :leave_requests
 
+  has_one :employee, dependent: :destroy
+
 end
