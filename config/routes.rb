@@ -33,4 +33,8 @@ Rails.application.routes.draw do
 
   resources :employees, only: [:index, :show, :create, :update, :destroy]
 
+  get 'reports/attendances', to: 'reports#attendances'
+  get 'reports/leaves', to: 'reports#leaves'
+
+
 end

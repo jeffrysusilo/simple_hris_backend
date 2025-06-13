@@ -5,7 +5,6 @@ class AttendancesController < ApplicationController
   def checkin
     today = Date.today
 
-    # Cegah double check-in
     existing = @current_user.attendances.find_by(date: today)
     if existing
       return render json: { error: "Kamu sudah check-in hari ini" }, status: :unprocessable_entity
@@ -17,7 +16,10 @@ class AttendancesController < ApplicationController
     )
 
     if attendance.persisted?
-      render json: { message: "Berhasil check-in", data: attendance }, status: :created
+      render json: { 
+        message: "Berhasil check-in", 
+        data: format_attendance(attendance) 
+      }, status: :created
     else
       render json: { error: attendance.errors.full_messages }, status: :unprocessable_entity
     end
@@ -37,12 +39,26 @@ class AttendancesController < ApplicationController
     end
 
     attendance.update(check_out: Time.current)
-    render json: { message: "Berhasil check-out", data: attendance }
+    render json: { 
+      message: "Berhasil check-out", 
+      data: format_attendance(attendance) 
+    }
   end
 
   # GET /attendances
   def index
-    render json: @current_user.attendances.order(date: :desc)
+    attendances = @current_user.attendances.order(date: :desc)
+    render json: attendances.map { |a| format_attendance(a) }
+  end
+
+  private
+
+  def format_attendance(att)
+    {
+      id: att.id,
+      date: att.date,
+      check_in: att.check_in&.strftime("%H:%M"),
+      check_out: att.check_out&.strftime("%H:%M")
+    }
   end
 end
-
