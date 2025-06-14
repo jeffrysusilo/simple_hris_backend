@@ -4,16 +4,12 @@ class ReportsController < ApplicationController
 
   # GET /reports/attendances
   def attendances
-    attendances = Attendance.all
+    start_date = params[:start_date].present? ? Date.parse(params[:start_date]) : Attendance.minimum(:date)
+    end_date   = params[:end_date].present? ? Date.parse(params[:end_date]) : Attendance.maximum(:date)
 
-    if params[:start_date].present? && params[:end_date].present?
-      start_date = Date.parse(params[:start_date])
-      end_date = Date.parse(params[:end_date])
+    attendances = Attendance.includes(:user).where(date: start_date..end_date)
 
-      attendances = attendances.where(date: start_date..end_date)
-    end
-
-    data = attendances.includes(:user).map do |a|
+    data = attendances.map do |a|
       {
         id: a.id,
         name: a.user.name,
@@ -25,8 +21,14 @@ class ReportsController < ApplicationController
       }
     end
 
-    render json: data
+    summary = calculate_summary(attendances, start_date, end_date)
+
+    render json: {
+      summary: summary,
+      data: data
+    }
   end
+
 
   private
 
@@ -39,4 +41,27 @@ class ReportsController < ApplicationController
       "Tepat Waktu"
     end
   end
+
+  def calculate_summary(attendances, start_date, end_date)
+    total_hadir = attendances.count { |a| a.check_in.present? }
+    terlambat = attendances.count { |a| a.check_in.present? && a.check_in > a.date.to_time.change(hour: 9, min: 0) }
+    tanpa_checkout = attendances.count { |a| a.check_in.present? && a.check_out.nil? }
+
+    all_employee_ids = User.where(role: 'employee').pluck(:id)
+    total_days = (start_date..end_date).to_a
+
+    absents = 0
+    all_employee_ids.each do |user_id|
+      user_days = attendances.select { |a| a.user_id == user_id }.map(&:date)
+      absents += (total_days - user_days).count
+    end
+
+    {
+      hadir: total_hadir,
+      terlambat: terlambat,
+      tanpa_checkout: tanpa_checkout,
+      tidak_hadir: absents
+    }
+  end
+
 end
